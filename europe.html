@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Europe Vote</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+
+  <body>
+    <script type="text/javascript">
+      let width = 800,
+        height = 500;
+
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      let europeProjection = d3
+        .geoMercator()
+        .center([13, 52])
+        // .scale([width / 1.5])
+        .scale([width / 2])
+        .translate([width / 2, height / 2]);
+
+      let pathGenerator = null;
+
+      // const geoJsonUrl =
+      //   "https://france-geojson.gregoiredavid.fr/repo/departements.geojson";
+
+      const geoJsonUrl =
+        "https://gist.githubusercontent.com/spiker830/3eab0cb407031bf9f2286f98b9d0558a/raw/7edae936285e77be675366550e20f9166bed0ed5/europe_features.json";
+
+      pathGenerator = d3.geoPath().projection(europeProjection);
+
+      d3.json(geoJsonUrl).then((geojson) => {
+        svg
+          .selectAll("path")
+          .data(geojson.features)
+          .enter()
+          .append("path")
+          .attr("id", (x) => x.properties.name)
+          .attr("d", pathGenerator)
+          .attr("stroke", "grey")
+          .attr("fill", "white")
+          .style("cursor", "pointer")
+          .on("mouseover", mouseover)
+          .on("mouseout", mouseout);
+      });
+      function mouseover(d) {
+        d3.select(this).style("fill", "yellow");
+      }
+      function mouseout(d) {
+        d3.select(this).style("fill", "white");
+      }
+    </script>
+  </body>
+</html>
