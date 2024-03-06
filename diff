@@ -1,0 +1,113 @@
+diff --git a/europe-vote/src/Components/VoteMap.tsx b/europe-vote/src/Components/VoteMap.tsx
+index 2b1d873..af0e03b 100644
+--- a/europe-vote/src/Components/VoteMap.tsx
++++ b/europe-vote/src/Components/VoteMap.tsx
+@@ -3,14 +3,15 @@ import "./VoteMap.css";
+ 
+ import * as d3 from "d3";
+ import * as GeoJSON from "geojson";
++import * as pc from "d3-parliament-chart";
+ import ReactDom from "next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.development"; // Counter alias nextjs v14
+ import { MutableRefObject, useEffect, useRef } from "react";
+ 
+ let currentCountry = {};
+ 
+-const OneParty = ({ party }) => {
++const OneParty = ({ party, key }) => {
+   return (
+-    <div className="one-party">
++    <div className="one-party" key={key}>
+       <div className="left">
+         <p>{party.partyName}</p>
+       </div>
+@@ -29,31 +30,37 @@ const OneParty = ({ party }) => {
+ };
+ 
+ const TooltipData = (country: Object) => {
+-  return ReactDom.renderToString(
++  const innerHtmlTooltip = ReactDom.renderToString(
+     <div>
+       <div className="country-name">{country.name}</div>
+       <div className="party-container">
+-        {country.results.map((party) => (
+-          <OneParty key={party.name} party={party} />
++        {country.results.map((party: object) => (
++          <div key={party.name}>
++            <OneParty party={party} />
++          </div>
+         ))}
+       </div>
+     </div>
+   );
++  console.log("🚀 ~ TooltipData ~ innerHtmlTooltip:", innerHtmlTooltip);
++  return innerHtmlTooltip;
+ };
+ 
+ export default function VoteMap() {
+-  const svgRef = useRef(null);
++  const svgMapRef = useRef(null);
++  const svgParliamentRef = useRef(null);
+ 
+   useEffect(() => {
+-    drawMap(svgRef);
++    drawMap(svgMapRef);
++    drawParliament(svgParliamentRef);
+   });
+ 
+-  const drawMap = (svgRef: MutableRefObject<null>) => {
++  const drawMap = (svgMapRef: MutableRefObject<null>) => {
+     let width = 800,
+       height = 500;
+ 
+     let svg = d3
+-      .select(svgRef.current)
++      .select(svgMapRef.current)
+       .attr("width", width)
+       .attr("height", height);
+ 
+@@ -127,12 +134,35 @@ export default function VoteMap() {
+     }
+   };
+ 
++  const drawParliament = (svgParliamentRef: MutableRefObject<null>) => {
++    // d3.csv("./meps_9_40_en.csv").then((data) => console.log(data));
++    // d3.csv("./meps_9_40_en.csv", function (data) {
++    //   console.log("🚀 ~ d3.csv ~ data:", data);
++    // });
++
++    d3.select(svgParliamentRef.current).call(
++      pc
++        .parliamentChart()
++        .width(800)
++        .aggregatedData([
++          { seats: 40, color: "#636cbb" },
++          { seats: 30, color: "#26d050" },
++          { seats: 50, color: "#315cee" },
++        ])
++    );
++  };
++
+   return (
+     <div>
+       <div className="main-title">
+         <h1>Élections Européenne de 2019</h1>
+       </div>
+-      <div className="row-data-visualisation-container">
++      <div>
++        <div className="parliament-container">
++          <svg ref={svgParliamentRef} />
++        </div>
++      </div>
++      <div className="row-map-container">
+         <div className="text-container">
+           <h2>Carte des résultats</h2>
+           <p className="instruction">-Survolez pour explorer les résultats</p>
+@@ -141,7 +171,7 @@ export default function VoteMap() {
+           </p>
+         </div>
+         <div className="svg-container">
+-          <svg ref={svgRef} />
++          <svg ref={svgMapRef} />
+         </div>
+       </div>
+     </div>
