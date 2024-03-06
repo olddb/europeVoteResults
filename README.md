@@ -1,3 +1,7 @@
+This project was to learn more about nextjs and geojson in D3js
+
+![Alt text](/public/screenshot.png?raw=true "Optional Title")
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
